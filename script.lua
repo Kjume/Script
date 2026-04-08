@@ -1,893 +1,1685 @@
 --[[
 	WARNING: Heads up! This script has not been verified by ScriptBlox. Use at your own risk!
 ]]
-local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
-local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
-local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
-local Window = Fluent:CreateWindow({
-    Title = "Be a Lucky Block",
-    SubTitle = "by Phemonaz",
-    TabWidth = 160,
-    Size = UDim2.fromOffset(550, 430),
-    Acrylic = false,
-    Theme = "Darker",
-    MinimizeKey = Enum.KeyCode.LeftControl
-})
-local Tabs = {
-    Main = Window:AddTab({ Title = "Main", Icon = "box" }),
-    Upgrades = Window:AddTab({ Title = "Upgrades", Icon = "info" }),
-    Brainrots = Window:AddTab({ Title = "Brainrots", Icon = "bot" }),
-    Sell = Window:AddTab({ Title = "Sell", Icon = "dollar-sign" }),
-    Stats = Window:AddTab({ Title = "Stats", Icon = "gauge" }),
-    Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
-}
-
-
-
-local Options = Fluent.Options
-do
------
------
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local claimGift = ReplicatedStorage
-    :WaitForChild("Packages")
-    :WaitForChild("_Index")
-    :WaitForChild("sleitnick_knit@1.7.0")
-    :WaitForChild("knit")
-    :WaitForChild("Services")
-    :WaitForChild("PlaytimeRewardService")
-    :WaitForChild("RF")
-    :WaitForChild("ClaimGift")
-local autoClaiming = false
-local ACPR = Tabs.Main:AddToggle("ACPR", {
-    Title = "Auto Claim Playtime Rewards",
-    Default = false
-})
-ACPR:OnChanged(function(state)
-    autoClaiming = state
-    if not state then return end
-    task.spawn(function()
-        while autoClaiming do
-            for reward = 1, 12 do
-                if not autoClaiming then break end
-                local success, err = pcall(function()
-                    claimGift:InvokeServer(reward)
-                end)
-                task.wait(0.25)
-            end
-            task.wait(1)
-        end
+task.spawn(function()
+    pcall(function()
+        local madComm = game:GetService("ReplicatedStorage"):WaitForChild("MadCommEvents", 10)
+        local ev = madComm and madComm:WaitForChild("6", 10)
+        if ev then ev:Destroy() end
     end)
 end)
-Options.ACPR:SetValue(false)
------
------
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local rebirth = ReplicatedStorage
-    :WaitForChild("Packages")
-    :WaitForChild("_Index")
-    :WaitForChild("sleitnick_knit@1.7.0")
-    :WaitForChild("knit")
-    :WaitForChild("Services")
-    :WaitForChild("RebirthService")
-    :WaitForChild("RF")
-    :WaitForChild("Rebirth")
-local running = false
-local AR = Tabs.Main:AddToggle("AR", {
-    Title = "Auto Rebirth",
-    Default = false
-})
-AR:OnChanged(function(state)
-    running = state
-    if not state then return end
-    task.spawn(function()
-        while running do
-            pcall(function()
-                rebirth:InvokeServer()
-            end)
-            task.wait(1)
-        end
-    end)
-end)
-Options.AR:SetValue(false)
------
------
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-local claim = ReplicatedStorage
-    :WaitForChild("Packages")
-    :WaitForChild("_Index")
-    :WaitForChild("sleitnick_knit@1.7.0")
-    :WaitForChild("knit")
-    :WaitForChild("Services")
-    :WaitForChild("SeasonPassService")
-    :WaitForChild("RF")
-    :WaitForChild("ClaimPassReward")
-local running = false
-local ACEPR = Tabs.Main:AddToggle("ACEPR", {
-    Title = "Auto Claim Event Pass Rewards",
-    Default = false
-})
-ACEPR:OnChanged(function(state)
-    running = state
-    if not state then return end
-    task.spawn(function()
-        while running do
-            local gui = player:WaitForChild("PlayerGui")
-                :WaitForChild("Windows")
-                :WaitForChild("Event")
-                :WaitForChild("Frame")
-                :WaitForChild("Frame")
-                :WaitForChild("Windows")
-                :WaitForChild("Pass")
-                :WaitForChild("Main")
-                :WaitForChild("ScrollingFrame")
-            for i = 1, 10 do
-                if not running then break end
-                local item = gui:FindFirstChild(tostring(i))
-                if item and item:FindFirstChild("Frame") and item.Frame:FindFirstChild("Free") then
-                    local free = item.Frame.Free
-                    local locked = free:FindFirstChild("Locked")
-                    local claimed = free:FindFirstChild("Claimed")
-                    while running and locked and locked.Visible do
-                        task.wait(0.2)
-                    end
-                    if running and claimed and claimed.Visible then
-                        continue
-                    end
-                    if running and locked and not locked.Visible then
-                        pcall(function()
-                            claim:InvokeServer("Free", i)
-                        end)
-                    end
+
+task.spawn(function()
+    pcall(function()
+        local gui = game:GetService("CoreGui"):WaitForChild("RobloxGui", 10)
+        if gui then
+            local function checkDesc(desc)
+                if desc.Name == "ScriptEditor" then
+                    desc:Destroy()
                 end
             end
-            task.wait(0.5)
+            
+            for _, desc in ipairs(gui:GetDescendants()) do
+                checkDesc(desc)
+            end
+            
+            gui.DescendantAdded:Connect(checkDesc)
         end
     end)
 end)
-Options.ACEPR:SetValue(false)
------
------
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local redeem = ReplicatedStorage
-    :WaitForChild("Packages")
-    :WaitForChild("_Index")
-    :WaitForChild("sleitnick_knit@1.7.0")
-    :WaitForChild("knit")
-    :WaitForChild("Services")
-    :WaitForChild("CodesService")
-    :WaitForChild("RF")
-    :WaitForChild("RedeemCode")
-local codes = {
-    "release"
-    -- add more codes here
-}
-Tabs.Main:AddButton({
-    Title = "Redeem All Codes",
-    Callback = function()
-        for _, code in ipairs(codes) do
-            pcall(function()
-                redeem:InvokeServer(code)
-            end)
-            task.wait(1)
-        end
-    end
-})
------
------
-Tabs.Upgrades:AddSection("Speed Upgrades")
------
------
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local upgrade = ReplicatedStorage
-    :WaitForChild("Packages")
-    :WaitForChild("_Index")
-    :WaitForChild("sleitnick_knit@1.7.0")
-    :WaitForChild("knit")
-    :WaitForChild("Services")
-    :WaitForChild("UpgradesService")
-    :WaitForChild("RF")
-    :WaitForChild("Upgrade")
-local amount = 1
-local delayTime = 0.5
-local running = false
-local IMS = Tabs.Upgrades:AddInput("IMS", {
-    Title = "Speed Amount",
-    Default = "1",
-    Placeholder = "Number",
-    Numeric = true,
-    Finished = false,
-    Callback = function(Value)
-        amount = tonumber(Value) or 1
-    end
-})
-IMS:OnChanged(function(Value)
-    amount = tonumber(Value) or 1
-end)
-local SMS = Tabs.Upgrades:AddSlider("SMS", {
-    Title = "Upgrade Interval",
-    Description = "",
-    Default = 1,
-    Min = 0,
-    Max = 5,
-    Rounding = 1,
-    Callback = function(Value)
-        delayTime = Value
-    end
-})
-SMS:OnChanged(function(Value)
-    delayTime = Value
-end)
-SMS:SetValue(1)
-local AMS = Tabs.Upgrades:AddToggle("AMS", {
-    Title = "Auto Upgrade Speed",
-    Default = false
-})
-AMS:OnChanged(function(state)
-    running = state
-    if not state then return end
-    task.spawn(function()
-        while running do
-            pcall(function()
-                upgrade:InvokeServer("MovementSpeed", amount)
-            end)
-            task.wait(delayTime)
-        end
-    end)
-end)
-Options.AMS:SetValue(false)
------
------
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-local buy = ReplicatedStorage
-    :WaitForChild("Packages")
-    :WaitForChild("_Index")
-    :WaitForChild("sleitnick_knit@1.7.0")
-    :WaitForChild("knit")
-    :WaitForChild("Services")
-    :WaitForChild("SkinService")
-    :WaitForChild("RF")
-    :WaitForChild("BuySkin")
-local skins = {
-    "prestige_mogging_luckyblock",
-    "mogging_luckyblock",
-    "colossus _luckyblock",
-    "inferno_luckyblock",
-    "divine_luckyblock",
-    "spirit_luckyblock",
-    "cyborg_luckyblock",
-    "void_luckyblock",
-    "gliched_luckyblock",
-    "lava_luckyblock",
-    "freezy_luckyblock",
-    "fairy_luckyblock"
-}
-local suffix = {
-    K = 1e3,
-    M = 1e6,
-    B = 1e9,
-    T = 1e12,
-    Qa = 1e15,
-    Qi = 1e18,
-    Sx = 1e21,
-    Sp = 1e24,
-    Oc = 1e27,
-    No = 1e30,
-    Dc = 1e33
-}
-local function parseCash(text)
-    text = text:gsub("%$", ""):gsub(",", ""):gsub("%s+", "")
-    local num = tonumber(text:match("[%d%.]+"))
-    local suf = text:match("%a+")
-    if not num then return 0 end
-    if suf and suffix[suf] then
-        return num * suffix[suf]
-    end
-    return num
-end
-local running = false
-local ABL = Tabs.Main:AddToggle("ABL", {
-    Title = "Auto Buy Best Luckyblock",
-    Default = false
-})
-ABL:OnChanged(function(state)
-    running = state
-    if not state then return end
-    task.spawn(function()
-        while running do
-            local gui = player.PlayerGui:FindFirstChild("Windows")
-            if not gui then 
-                task.wait(1)
-                continue 
-            end
-            local pickaxeShop = gui:FindFirstChild("PickaxeShop")
-            if not pickaxeShop then 
-                task.wait(1)
-                continue 
-            end
-            local shopContainer = pickaxeShop:FindFirstChild("ShopContainer")
-            if not shopContainer then 
-                task.wait(1)
-                continue 
-            end
-            local scrollingFrame = shopContainer:FindFirstChild("ScrollingFrame")
-            if not scrollingFrame then 
-                task.wait(1)
-                continue 
-            end
-            local cash = player.leaderstats.Cash.Value
-            local bestSkin = nil
-            local bestPrice = 0
-            for i = 1, #skins do
-                local name = skins[i]
-                local item = scrollingFrame:FindFirstChild(name)
-                if item then
-                    local main = item:FindFirstChild("Main")
-                    if main then
-                        local buyFolder = main:FindFirstChild("Buy")
-                        if buyFolder then
-                            local buyButton = buyFolder:FindFirstChild("BuyButton")
-                            if buyButton and buyButton.Visible then
-                                local cashLabel = buyButton:FindFirstChild("Cash")
-                                if cashLabel then
-                                    local price = parseCash(cashLabel.Text)
-                                    if cash >= price and price > bestPrice then
-                                        bestSkin = name
-                                        bestPrice = price
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-            end
-            if bestSkin then
-                pcall(function()
-                    buy:InvokeServer(bestSkin)
-                end)
-            end
-            task.wait(0.5)
-        end
-    end)
-end)
-Options.ABL:SetValue(false)
------
------
-Tabs.Main:AddButton({
-    Title = "Sell Held Brainrot",
-    Callback = function()
-        Window:Dialog({
-            Title = "Confirm Sale",
-            Content = "Are you sure you want to sell this held Brainrot?",
-            Buttons = {
-                {
-                    Title = "Confirm",
-                    Callback = function()
-                        local player = game:GetService("Players").LocalPlayer
-                        local character = player.Character or player.CharacterAdded:Wait()
-                        local tool = character:FindFirstChildOfClass("Tool")
-                        if not tool then
-                            Fluent:Notify({
-                                Title = "ERROR!",
-                                Content = "Equip the Brainrot you want to Sell",
-                                Duration = 5
-                            })
-                            return
-                        end
-                        local entityId = tool:GetAttribute("EntityId")
-                        if not entityId then return end
-                        local args = {
-                            entityId
-                        }
-                        game:GetService("ReplicatedStorage")
-                            :WaitForChild("Packages")
-                            :WaitForChild("_Index")
-                            :WaitForChild("sleitnick_knit@1.7.0")
-                            :WaitForChild("knit")
-                            :WaitForChild("Services")
-                            :WaitForChild("InventoryService")
-                            :WaitForChild("RF")
-                            :WaitForChild("SellBrainrot")
-                            :InvokeServer(unpack(args))
-                        Fluent:Notify({
-                            Title = "SOLD!",
-                            Content = "Sold: " .. tool.Name,
-                            Duration = 5
-                        })
 
-                    end
-                },
-                {
-                    Title = "Cancel",
-                    Callback = function()
-                    end
-                }
-            }
-        })
+if game.PlaceId == 18680867089 then
+    
+    local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+    
+    local Window = Rayfield:CreateWindow({
+       Name = "UtilityHub Crack | Ultimate Mining Tycoon",
+       Icon = 0,
+       LoadingTitle = "Ultimate Mining Tycoon",
+       LoadingSubtitle = "Loading Utility Hub...",
+       Theme = "Default", 
+    
+        DisableRayfieldPrompts = true,
+        DisableBuildWarnings = true,
+    
+        ConfigurationSaving = {
+            Enabled = false,
+            FolderName = nil,
+            FileName = nil
+        },
+      
+    })
+    local initialLoad = false
+    
+    -- Teleport helper function and tables (must be before any tab creation)
+    local function TeleportPlayer(position, locationName)
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local hrp = character:FindFirstChild("HumanoidRootPart")
+        if hrp then
+            hrp.CFrame = CFrame.new(position)
+            Rayfield:Notify({
+                Title = "Teleported",
+                Content = "Successfully teleported to " .. locationName,
+                Duration = 3,
+                Image = "map-pin",
+            })
+        else
+            Rayfield:Notify({
+                Title = "Error",
+                Content = "Could not teleport. Try again.",
+                Duration = 3,
+                Image = "circle-x",
+            })
+        end
     end
-})
------
------
-Tabs.Main:AddButton({
-    Title = "Pickup All Your Brainrots",
-    Callback = function()
-        Window:Dialog({
-            Title = "Confirm Pickup!",
-            Content = "Pick up all Brainrots?",
-            Buttons = {
-                {
-                    Title = "Confirm",
-                    Callback = function()
-                        local player = game:GetService("Players").LocalPlayer
-                        local username = player.Name
-                        local plotsFolder = workspace:WaitForChild("Plots")
-                        local myPlot
-                        for i = 1, 5 do
-                            local plot = plotsFolder:FindFirstChild(tostring(i))
-                            if plot and plot:FindFirstChild(tostring(i)) then
-                                local inner = plot[tostring(i)]
-                                for _, v in pairs(inner:GetDescendants()) do
-                                    if v:IsA("BillboardGui") and string.find(v.Name, username) then
-                                        myPlot = inner
-                                        break
-                                    end
-                                end
-                            end
-                            if myPlot then break end
-                        end
-                        if not myPlot then return end
-                        local containers = myPlot:FindFirstChild("Containers")
-                        if not containers then return end
-                        for i = 1, 30 do
-                            local containerFolder = containers:FindFirstChild(tostring(i))
-                            if containerFolder and containerFolder:FindFirstChild(tostring(i)) then
-                                local container = containerFolder[tostring(i)]
-                                local innerModel = container:FindFirstChild("InnerModel")
-                                if innerModel and #innerModel:GetChildren() > 0 then
-                                    local args = {
-                                        tostring(i)
-                                    }
-                                    game:GetService("ReplicatedStorage")
-                                        :WaitForChild("Packages")
-                                        :WaitForChild("_Index")
-                                        :WaitForChild("sleitnick_knit@1.7.0")
-                                        :WaitForChild("knit")
-                                        :WaitForChild("Services")
-                                        :WaitForChild("ContainerService")
-                                        :WaitForChild("RF")
-                                        :WaitForChild("PickupBrainrot")
-                                        :InvokeServer(unpack(args))
-                                    task.wait(0.1)
-                                end
-                            end
-                        end
-                        Fluent:Notify({
-                            Title = "Done!",
-                            Content = "Picked up all Brainrots",
-                            Duration = 5
-                        })
-                    end
-                },
-                {
-                    Title = "Cancel",
-                    Callback = function()
-                    end
-                }
-            }
-        })
-    end
-})
------
------
-local storedParts = {}
-local folder = workspace:WaitForChild("BossTouchDetectors")
-local RBTD = Tabs.Brainrots:AddToggle("RBTD", {
-    Title = "Remove Bad Boss Touch Detectors",
-    Description = "will make it so only the last boss can capture you",
-    Default = false
-})
-RBTD:OnChanged(function(state)
-    if state then
-        storedParts = {}
-        for _, obj in ipairs(folder:GetChildren()) do
-            if obj.Name ~= "base14" then
-                table.insert(storedParts, obj)
-                obj.Parent = nil
+    local staticLocations = {
+        ["ğŸ”ï¸ Mine Entrance"] = Vector3.new(-1854.75, 2.04, -194.96),
+        ["ğŸ›’ Shop"] = Vector3.new(-1551.34, 7.16, 20.68),
+        ["ğŸ’£ C4 Shop"] = Vector3.new(385.718, 78.8767, -745.346),
+        ["ğŸš€ Upgrade Shop"] = Vector3.new(-1450.19763, 10.6423292, 227.80098, -0.566338837, -2.32709585e-08, 0.824172497, 1.8936408e-08, 1, 4.12478975e-08, -0.824172497, 3.89671513e-08, -0.566338837)
+    }
+    local staticLocationNames = {"ğŸ”ï¸ Mine Entrance", "ğŸ›’ Shop",  "ğŸ’£ C4 Shop", "ğŸš€ Upgrade Shop"}
+    
+    local Farm = Window:CreateTab("Farm", "pickaxe") 
+
+    local Teleport = Window:CreateTab("Teleport", "map")
+
+    -- Move Mobile tab after Teleport
+    local MobileSupport = Window:CreateTab("Mobile", "smartphone")
+    local MobileSection = MobileSupport:CreateSection("ğŸ“± Mobile Compatibility")
+    MobileSupport:CreateParagraph({
+        Title = "â€¢ Mobile Supported",
+        Content = "\nWe have updated the script too support mobile devices. If you encounter any issues on mobile, please report them to the Utility Hub Discord Server."
+    })
+    local MobileDivider = MobileSupport:CreateDivider()
+    
+    local PlayerSection = Teleport:CreateSection("ğŸ‘½ Player Teleports")
+    local function RefreshPlayerList()
+        local playerNames = {"Refresh player list"}
+        for _, player in pairs(game.Players:GetPlayers()) do
+            if player ~= game.Players.LocalPlayer then
+                table.insert(playerNames, player.Name)
             end
         end
-    else
-        for _, obj in ipairs(storedParts) do
-            if obj then
-                obj.Parent = folder
-            end
+        if PlayerDropdown then
+            PlayerDropdown:Refresh(playerNames)
+            PlayerDropdown:Set({selectedPlayer or "Refresh player list"})
         end
-        storedParts = {}
+        return playerNames
     end
-end)
-Options.RBTD:SetValue(false)
------
------
-Tabs.Brainrots:AddButton({
-    Title = "Teleport to End",
-    Callback = function()
-        local modelsFolder = workspace:WaitForChild("RunningModels")
-        local target = workspace:WaitForChild("CollectZones"):WaitForChild("base14")
-        for _, obj in ipairs(modelsFolder:GetChildren()) do
-            if obj:IsA("Model") then
-                if obj.PrimaryPart then
-                    obj:SetPrimaryPartCFrame(target.CFrame)
+    -- PlayerDropdown and selectedPlayer must be defined before use
+    local selectedPlayer = nil
+    local PlayerDropdown
+    PlayerDropdown = Teleport:CreateDropdown({
+        Name = "Select Player",
+        Options = RefreshPlayerList(),
+        CurrentOption = {"Refresh player list"},
+        MultipleOptions = false,
+        Flag = nil, 
+        Callback = function(Option)
+            selectedPlayer = Option[1]
+        end,
+    })
+    Teleport:CreateButton({
+        Name = "Teleport to Selected Player",
+        Callback = function()
+            if not selectedPlayer or selectedPlayer == "Refresh player list" then
+                Rayfield:Notify({
+                    Title = "Error",
+                    Content = "Please select a player to teleport to.",
+                    Duration = 3,
+                    Image = "circle-x",
+                })
+                return
+            end
+            local targetPlayer = game.Players:FindFirstChild(selectedPlayer)
+            if targetPlayer and targetPlayer.Character then
+                local targetHRP = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
+                local localPlayer = game.Players.LocalPlayer
+                local character = localPlayer.Character or localPlayer.CharacterAdded:Wait()
+                local hrp = character:FindFirstChild("HumanoidRootPart")
+                if targetHRP and hrp then
+                    local offset = targetHRP.CFrame.LookVector * -5 + Vector3.new(0, 3, 0)
+                    hrp.CFrame = targetHRP.CFrame + offset
+                    Rayfield:Notify({
+                        Title = "Teleported",
+                        Content = "Successfully teleported to " .. targetPlayer.Name,
+                        Duration = 3,
+                        Image = "map-pin",
+                    })
                 else
-                    local part = obj:FindFirstChildWhichIsA("BasePart")
-                    if part then
-                        part.CFrame = target.CFrame
+                    Rayfield:Notify({
+                        Title = "Error",
+                        Content = "Could not teleport to player. Try again.",
+                        Duration = 3,
+                        Image = "circle-x",
+                    })
+                end
+            else
+                Rayfield:Notify({
+                    Title = "Error",
+                    Content = "Player not found or not loaded in game.",
+                    Duration = 3,
+                    Image = "circle-x",
+                })
+            end
+        end,
+    })
+    -- Automatically refresh player list every 5 seconds, no notifications
+    task.spawn(function()
+        while true do
+            task.wait(5)
+            RefreshPlayerList()
+        end
+    end)
+    -- Remove notifications from PlayerAdded and PlayerRemoving
+    game.Players.PlayerAdded:Connect(function(player)
+        task.wait(1)
+        RefreshPlayerList()
+    end)
+    game.Players.PlayerRemoving:Connect(function(player)
+        task.wait(1)
+        RefreshPlayerList()
+    end)
+    
+    local PlayerDivider = Teleport:CreateDivider()
+    
+    local StaticTeleportSection = Teleport:CreateSection("ğŸš€ Static Teleports")
+    -- Dropdown and button for static teleports (with emojis)
+    local selectedStaticLocation = staticLocationNames[1] -- default
+    Teleport:CreateDropdown({
+        Name = "Select Static Location",
+        Options = staticLocationNames,
+        CurrentOption = {selectedStaticLocation},
+        MultipleOptions = false,
+        Flag = "StaticLocationDropdown",
+        Callback = function(Option)
+            selectedStaticLocation = Option[1]
+        end,
+    })
+    Teleport:CreateButton({
+        Name = "Teleport to Selected Location",
+        Callback = function()
+            local pos = staticLocations[selectedStaticLocation]
+            if pos then
+                TeleportPlayer(pos, selectedStaticLocation)
+            else
+                Rayfield:Notify({
+                    Title = "Error",
+                    Content = "No location selected.",
+                    Duration = 3,
+                    Image = "circle-x",
+                })
+            end
+        end,
+    })
+    
+    local LocationDivider = Teleport:CreateDivider()
+    
+    local PlotSection = Teleport:CreateSection("ğŸ›¸ Plot Teleports")
+    -- Dropdown and button for plot teleports (with emojis)
+    local plotOptions = {}
+    for i = 1, 8 do
+        table.insert(plotOptions, "ğŸ  Plot " .. i)
+    end
+    local selectedPlot = plotOptions[1] -- default
+    Teleport:CreateDropdown({
+        Name = "Select Plot",
+        Options = plotOptions,
+        CurrentOption = {selectedPlot},
+        MultipleOptions = false,
+        Flag = "PlotTeleportDropdown",
+        Callback = function(Option)
+            selectedPlot = Option[1]
+        end,
+    })
+    Teleport:CreateButton({
+        Name = "Teleport to Selected Plot",
+        Callback = function()
+            local plotNumber = tonumber(string.match(selectedPlot, "Plot (%d+)"))
+            if plotNumber then
+                local plotsFolder = game:GetService("Workspace"):WaitForChild("Plots")
+                local plot = plotsFolder:FindFirstChild(tostring(plotNumber))
+                if plot then
+                    local centrePart = plot:FindFirstChild("Centre")
+                    if centrePart then
+                        local player = game.Players.LocalPlayer
+                        local character = player.Character or player.CharacterAdded:Wait()
+                        local hrp = character:FindFirstChild("HumanoidRootPart")
+                        if hrp then
+                            hrp.CFrame = CFrame.new(centrePart.Position + Vector3.new(0, 2, 0))
+                            Rayfield:Notify({
+                                Title = "Teleported",
+                                Content = "Successfully teleported to " .. selectedPlot,
+                                Duration = 3,
+                                Image = "map-pin",
+                            })
+                        else
+                            Rayfield:Notify({
+                                Title = "Error",
+                                Content = "Character not found. Try again.",
+                                Duration = 3,
+                                Image = "circle-x",
+                            })
+                        end
+                    else
+                        Rayfield:Notify({
+                            Title = "Error",
+                            Content = "Centre part not found in " .. selectedPlot,
+                            Duration = 3,
+                            Image = "circle-x",
+                        })
+                    end
+                else
+                    Rayfield:Notify({
+                        Title = "Error",
+                        Content = selectedPlot .. " not found in workspace",
+                        Duration = 3,
+                        Image = "circle-x",
+                    })
+                end
+            end
+        end,
+    })
+    
+    local TeleportSection = Teleport:CreateSection("ğŸŒ€ Tycoon Teleport")
+    local TycoonButton = Teleport:CreateButton({
+        Name = "Teleport to Your Slot",
+        Flag = nil,
+        Callback = function()
+            local function teleportToMyPlot()
+                local player = game.Players.LocalPlayer
+                local plotsFolder = workspace:WaitForChild("Plots")
+                local teleportPartName = "Centre"
+                local function isOwned(buildPlot)
+                    return #buildPlot:GetChildren() > 0
+                end
+                local function findMyPlot()
+                    for _, plotModel in ipairs(plotsFolder:GetChildren()) do
+                        if plotModel:IsA("Model") then
+                            local buildPlot = plotModel:FindFirstChild("BuildPlot")
+                            if buildPlot and isOwned(buildPlot) then
+                                return plotModel
+                            end
+                        end
+                    end
+                    return "map-pin"
+                end
+                local myPlot = findMyPlot()
+                if myPlot then
+                    local centrePart = myPlot:FindFirstChild(teleportPartName)
+                    if centrePart and centrePart:IsA("BasePart") then
+                        local character = player.Character or player.CharacterAdded:Wait()
+                        local hrp = character:FindFirstChild("HumanoidRootPart")
+                        if hrp then
+                            hrp.CFrame = CFrame.new(centrePart.Position + Vector3.new(0, 2, 0))
+                            Rayfield:Notify({
+                                Title = "Teleported",
+                                Content = "Successfully teleported to your tycoon slot.",
+                                Duration = 3,
+                                Image = "map-pin",
+                            })
+                        end
+                    else
+                        Rayfield:Notify({
+                            Title = "Error",
+                            Content = "Centre part not found in your plot!",
+                            Duration = 3,
+                            Image = "circle-x",
+                        })
+                    end
+                else
+                    Rayfield:Notify({
+                        Title = "Error",
+                        Content = "Your plot was not found! Make sure you have a tycoon slot.",
+                        Duration = 3,
+                        Image = "circle-x",
+                    })
+                end
+            end
+            if initialLoad then
+                return
+            end
+            teleportToMyPlot()
+        end,
+    })
+    
+    local Misc = Window:CreateTab("Misc", "boxes") 
+    
+    local Section = Misc:CreateSection("Misc Area")
+    
+    -- Sell Ore Button for Mobile
+    local SellOreSection = MobileSupport:CreateSection("â›°ï¸ Sell Ore")
+    local SellOreButton = MobileSupport:CreateButton({
+        Name = "Sell Ore",
+        Callback = function()
+            local player = game.Players.LocalPlayer
+            local character = player.Character or player.CharacterAdded:Wait()
+            local hrp = character:WaitForChild("HumanoidRootPart")
+            local savedCFrame = hrp.CFrame
+            
+                -- Use a more robust search for the CargoVolume/Unloader
+                local cargoPrompt = nil
+                local positionCargoVolume = nil
+                
+                -- Helper function to find the cargo prompt anywhere in FactoryGridItemsServer
+                local factoryGridItemsServer = game:GetService("Workspace"):FindFirstChild("FactoryGridItemsServer")
+                local factoryGridItemsClient = game:GetService("Workspace"):FindFirstChild("FactoryGridItemsClient")
+                
+                if factoryGridItemsServer then
+                    for _, folder in pairs(factoryGridItemsServer:GetChildren()) do
+                        if folder:IsA("Folder") then
+                            local cargoVolume = folder:FindFirstChild("CargoVolume") or folder:FindFirstChild("Unloader")
+                            if not cargoVolume then
+                                -- Check subfolders or descendants for anything named CargoVolume
+                                cargoVolume = folder:FindFirstChild("CargoVolume", true)
+                            end
+                            
+                            if cargoVolume then
+                                local foundPrompt = cargoVolume:FindFirstChild("CargoPrompt") or cargoVolume:FindFirstChildOfClass("ProximityPrompt") or cargoVolume:FindFirstChild("CargoPrompt", true)
+                                if not foundPrompt then
+                                    -- Final fallback: search all descendants for a ProximityPrompt
+                                    for _, desc in pairs(cargoVolume:GetDescendants()) do
+                                        if desc:IsA("ProximityPrompt") then
+                                            foundPrompt = desc
+                                            break
+                                        end
+                                    end
+                                end
+                                
+                                if foundPrompt then
+                                    cargoPrompt = foundPrompt
+                                    -- Match with client folder for positioning
+                                    if factoryGridItemsClient then
+                                        local clientFolder = factoryGridItemsClient:FindFirstChild(folder.Name)
+                                        if clientFolder then
+                                            local clientSubFolder = clientFolder:FindFirstChild(folder.Name)
+                                            if clientSubFolder then
+                                                positionCargoVolume = clientSubFolder:FindFirstChild("Unloader1") and clientSubFolder.Unloader1:FindFirstChild("CargoVolume") or clientSubFolder:FindFirstChild("CargoVolume", true)
+                                            end
+                                        end
+                                    end
+                                    if cargoPrompt and positionCargoVolume then break end
+                                end
+                            end
+                        end
+                    end
+                
+                if cargoPrompt and positionCargoVolume then
+                    -- Count ores before selling
+                    local function countOres()
+                        local count = 0
+                        local playerWorkspace = game:GetService("Workspace"):FindFirstChild(player.Name)
+                        if playerWorkspace then
+                            local orePackCargo = playerWorkspace:FindFirstChild("OrePackCargo")
+                            if orePackCargo then
+                                for _, child in pairs(orePackCargo:GetChildren()) do
+                                    if not child:IsA("Weld") and not child:IsA("Motor6D") and not child:IsA("Attachment") then
+                                        count = count + 1
+                                    end
+                                end
+                            end
+                        end
+                        return count
+                    end
+                    
+                    local oreCount = countOres()
+                    
+                    -- Position near the CargoVolume and fire the ProximityPrompt
+                    hrp.CFrame = positionCargoVolume.CFrame * CFrame.new(0, 3, 0)
+                    task.wait(0.3)
+                    cargoPrompt.HoldDuration = 0
+                    fireproximityprompt(cargoPrompt)
+                    task.wait(0.3)
+                    hrp.CFrame = savedCFrame
+                    
+                    Rayfield:Notify({
+                        Title = "Ore Sold",
+                        Content = "Successfully sold " .. oreCount .. " ores.",
+                        Duration = 3,
+                        Image = "check-circle",
+                    })
+                else
+                    Rayfield:Notify({
+                        Title = "Error",
+                        Content = "No working CargoVolume with ProximityPrompt found! Make sure someone has built an unloader.",
+                        Duration = 3,
+                        Image = "circle-x",
+                    })
+                end
+            else
+                Rayfield:Notify({
+                    Title = "Error",
+                    Content = "FactoryGridItemsServer not found! Make sure you have built an unloader.",
+                    Duration = 3,
+                    Image = "circle-x",
+                })
+            end
+        end,
+    })
+    
+    -- Waypoint System for Mobile
+    local MobileWaypointSection = MobileSupport:CreateSection("ğŸ“ Waypoint System")
+    local MobileWaypointLabel = MobileSupport:CreateLabel("Set a waypoint and teleport back to it")
+    
+    local SetWaypointButton = MobileSupport:CreateButton({
+        Name = "Set Waypoint",
+        Callback = function()
+            local player = game.Players.LocalPlayer
+            local character = player.Character or player.CharacterAdded:Wait()
+            local hrp = character:FindFirstChild("HumanoidRootPart")
+            
+            if hrp then
+                _G.savedWaypoint = hrp.CFrame
+                Rayfield:Notify({
+                    Title = "Waypoint Set",
+                    Content = "Successfully saved current position as waypoint.",
+                    Duration = 3,
+                    Image = "map-pin",
+                })
+            else
+                Rayfield:Notify({
+                    Title = "Error",
+                    Content = "Character not found. Try again.",
+                    Duration = 3,
+                    Image = "circle-x",
+                })
+            end
+        end,
+    })
+    
+    local TeleportToWaypointButton = MobileSupport:CreateButton({
+        Name = "Teleport to Waypoint",
+        Callback = function()
+            local player = game.Players.LocalPlayer
+            local character = player.Character or player.CharacterAdded:Wait()
+            local hrp = character:FindFirstChild("HumanoidRootPart")
+            
+            if hrp and _G.savedWaypoint then
+                hrp.CFrame = _G.savedWaypoint
+                Rayfield:Notify({
+                    Title = "Teleported to Waypoint",
+                    Content = "Successfully teleported to saved waypoint.",
+                    Duration = 3,
+                    Image = "map-pin",
+                })
+            else
+                Rayfield:Notify({
+                    Title = "Error",
+                    Content = _G.savedWaypoint and "Character not found. Try again." or "No waypoint set. Set a waypoint first.",
+                    Duration = 3,
+                    Image = "circle-x",
+                })
+            end
+        end,
+    })
+    
+    local Credits = Window:CreateTab("Credits", "info")
+    local CreatorSection = Credits:CreateSection("ğŸ‘¤ Script Creator")
+    Credits:CreateParagraph({
+        Title = "Made by Diverse / Cracked By ATA_scripts [Equinox Hub]",
+        Content = "Ultimate Mining Tycoon Script"
+    })
+    local DividerCredits = Credits:CreateDivider()
+    local VersionSection = Credits:CreateSection("ğŸ““ changelog")
+    Credits:CreateParagraph({
+        Title = "Updated 3/29/2026",
+        Content = "â€¢ Added Anti-Cheat Bypass"
+    })
+    
+    
+    local Button = Misc:CreateButton({ 
+        Name = "ğŸ›’ Buy Vehicle / Spawn", 
+        Callback = function() 
+            local player = game.Players.LocalPlayer
+            local plotsFolder = workspace:WaitForChild("Plots")
+            local PlayerSlot = nil
+            local function isOwned(buildPlot)
+                return #buildPlot:GetChildren() > 0
+            end
+            for _, plotModel in ipairs(plotsFolder:GetChildren()) do
+                if plotModel:IsA("Model") then
+                    local buildPlot = plotModel:FindFirstChild("BuildPlot")
+                    if buildPlot and isOwned(buildPlot) then
+                        PlayerSlot = plotModel.Name
+                        break
                     end
                 end
-            elseif obj:IsA("BasePart") then
-                obj.CFrame = target.CFrame
             end
-        end
-    end
-})
------
------
-Tabs.Brainrots:AddSection("Farming")
-local running = false
-local AutoFarmToggle = Tabs.Brainrots:AddToggle("AutoFarmToggle", {
-    Title = "Auto Farm Best Brainrots",
-    Default = false
-})
-AutoFarmToggle:OnChanged(function(state)
-    running = state
-    if state then
-        task.spawn(function()
-            while running do
+            if PlayerSlot then
+                -- Use the new FactoryGridItemsClient structure for vehicle spawner
+                local factoryGridItemsClient = game:GetService("Workspace"):FindFirstChild("FactoryGridItemsClient")
+                if factoryGridItemsClient then
+                    local vehicleSpawner = nil
+                    local vehicleSpawnerPos = nil
+                    local proximityPrompt = nil
+                    
+                    -- Search through all folders in FactoryGridItemsClient to find any VehicleSpawner
+                    for _, folder in pairs(factoryGridItemsClient:GetChildren()) do
+                        if folder:IsA("Folder") then
+                            local subFolder = folder:FindFirstChild(folder.Name)
+                            if subFolder then
+                                local spawner = subFolder:FindFirstChild("VehicleSpawner")
+                                if spawner then
+                                    local screenPart = spawner:FindFirstChild("ScreenPart")
+                                    if screenPart then
+                                        local prompt = screenPart:FindFirstChild("ProximityPrompt")
+                                        if prompt then
+                                            vehicleSpawner = spawner
+                                            vehicleSpawnerPos = screenPart.Position
+                                            proximityPrompt = prompt
+                                            break
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                    
+                    if vehicleSpawner and proximityPrompt then
+                        game.Workspace[player.Name].HumanoidRootPart.CFrame = CFrame.new(vehicleSpawnerPos)
+                        task.wait(0.3)
+                        proximityPrompt.HoldDuration = 0
+                        fireproximityprompt(proximityPrompt)
+                        Rayfield:Notify({
+                            Title = "Vehicle Purchase",
+                            Content = "Teleported to vehicle spawner.",
+                            Duration = 3,
+                            Image = 4483362458,
+                        })
+                    else
+                        Rayfield:Notify({
+                            Title = "Error",
+                            Content = "Vehicle spawner not found in FactoryGridItemsClient! Make sure someone has built a vehicle spawner.",
+                            Duration = 3,
+                            Image = "circle-x",
+                        })
+                    end
+                else
+                    Rayfield:Notify({
+                        Title = "Error",
+                        Content = "FactoryGridItemsClient not found! Make sure you have built factory items.",
+                        Duration = 3,
+                        Image = "circle-x",
+                    })
+                end
+            else
+                Rayfield:Notify({
+                    Title = "Error",
+                    Content = "Your plot was not found! Make sure you have a tycoon slot.",
+                    Duration = 3,
+                    Image = "circle-x",
+                })
+            end
+        end, 
+    })
+    
+    local ShopDropdown = Misc:CreateDropdown({
+        Name = "ğŸ›’ Buy / Equip Shop Items",
+        Options = {"Select Shop", "â›ï¸ Pickaxe Shop", "ğŸ’ Backpack Shop", "ğŸ’£ C4 Shop", "ğŸš€ Upgrade Shop"},
+        CurrentOption = {"Select Shop"},
+        MultipleOptions = false,
+        Flag = "",
+        Callback = function(Option)
+            local function handleShopTeleport(selectedOption)
+                if selectedOption == "Select Shop" then
+                    return
+                end
                 local player = game.Players.LocalPlayer
                 local character = player.Character or player.CharacterAdded:Wait()
-                local root = character:WaitForChild("HumanoidRootPart")
-                local humanoid = character:WaitForChild("Humanoid")
-                local userId = player.UserId
-                local modelsFolder = workspace:WaitForChild("RunningModels")
-                local target = workspace:WaitForChild("CollectZones"):WaitForChild("base14")
-                root.CFrame = CFrame.new(715, 39, -2122)
-                task.wait(0.3)
-                humanoid:MoveTo(Vector3.new(710, 39, -2122))
-                local ownedModel = nil
-                repeat
-                    task.wait(0.3)
-                    for _, obj in ipairs(modelsFolder:GetChildren()) do
-                        if obj:IsA("Model") and obj:GetAttribute("OwnerId") == userId then
-                            ownedModel = obj
+                local hrp = character:FindFirstChild("HumanoidRootPart")
+                if not hrp then
+                    Rayfield:Notify({
+                        Title = "Error",
+                        Content = "Character not found. Try again.",
+                        Duration = 3,
+                        Image = "circle-x",
+                    })
+                    return
+                end
+                local originalPosition = hrp.CFrame
+                local shopObject, shopName
+                if selectedOption == "â›ï¸ Pickaxe Shop" then
+                    shopObject = game:GetService("Workspace"):FindFirstChild("Pickaxe Store")
+                    shopName = "Pickaxe Shop"
+                elseif selectedOption == "ğŸ’ Backpack Shop" then
+                    shopObject = game:GetService("Workspace"):FindFirstChild("Backpack Store")
+                    shopName = "Backpack Shop"
+                elseif selectedOption == "ğŸ’£ C4 Shop" then
+                    shopObject = game:GetService("Workspace"):FindFirstChild("Explosives Store")
+                    shopName = "C4 Shop"
+                elseif selectedOption == "ğŸš€ Upgrade Shop" then
+                    shopObject = game:GetService("Workspace"):FindFirstChild("Prestige Store")
+                    shopName = "Upgrade Shop"
+                end
+                if not shopObject then
+                    Rayfield:Notify({
+                        Title = "Error",
+                        Content = shopName .. " not found in workspace",
+                        Duration = 3,
+                        Image = "circle-x",
+                    })
+                    return
+                end
+                
+                -- Try to find the activation point - check multiple possible names
+                local activationPoint = shopObject:FindFirstChild("ActivationPoint") or 
+                                      shopObject:FindFirstChild("PickaxeLocation") or
+                                      shopObject:FindFirstChild("BackpackLocation") or
+                                      shopObject:FindFirstChild("ExplosivesLocation") or
+                                      shopObject:FindFirstChild("PrestigeLocation")
+                
+                if not activationPoint or not activationPoint:IsA("BasePart") then
+                    Rayfield:Notify({
+                        Title = "Error",
+                        Content = shopName .. " activation point not found",
+                        Duration = 3,
+                        Image = "circle-x",
+                    })
+                    return
+                end
+                
+                -- Try to find ProximityPrompt in the activation point or its children
+                local proximityPrompt = activationPoint:FindFirstChild("ProximityPrompt")
+                if not proximityPrompt then
+                    -- Search deeper for ProximityPrompt
+                    for _, child in pairs(activationPoint:GetDescendants()) do
+                        if child:IsA("ProximityPrompt") then
+                            proximityPrompt = child
                             break
                         end
                     end
-                until ownedModel ~= nil or not running
-                if not running then break end
-                if ownedModel.PrimaryPart then
-                    ownedModel:SetPrimaryPartCFrame(target.CFrame)
-                else
-                    local part = ownedModel:FindFirstChildWhichIsA("BasePart")
-                    if part then
-                        part.CFrame = target.CFrame
+                end
+                
+                if not proximityPrompt then
+                    Rayfield:Notify({
+                        Title = "Error",
+                        Content = shopName .. " proximity prompt not found",
+                        Duration = 3,
+                        Image = "circle-x",
+                    })
+                    return
+                end
+                local shopPos = activationPoint.Position
+                hrp.CFrame = CFrame.new(shopPos + Vector3.new(0, 2, 0))
+                task.wait(0.5)
+                proximityPrompt.HoldDuration = 0
+                fireproximityprompt(proximityPrompt)
+                Rayfield:Notify({
+                    Title = shopName,
+                    Content = "Teleported to " .. shopName .. ". Will return in 6 seconds.",
+                    Duration = 3,
+                    Image = 4483362458,
+                })
+                task.wait(1)
+                for i = 5, 1, -1 do
+                    task.wait(1)
+                    if i % 3 == 0 or i <= 3 then
+                        Rayfield:Notify({
+                            Title = "Returning Soon",
+                            Content = "Teleporting back in " .. i .. " seconds...",
+                            Duration = 1,
+                            Image = 4483362458,
+                        })
                     end
                 end
-                task.wait(0.7)
-                if ownedModel and ownedModel.Parent == modelsFolder then
-                    if ownedModel.PrimaryPart then
-                        ownedModel:SetPrimaryPartCFrame(target.CFrame * CFrame.new(0, -5, 0))
+                if player and player.Parent and player.Character then
+                    local currentCharacter = player.Character
+                    local currentHrp = currentCharacter:FindFirstChild("HumanoidRootPart")
+                    if currentHrp then
+                        currentHrp.CFrame = originalPosition
+                        Rayfield:Notify({
+                            Title = shopName,
+                            Content = "Returned to original position",
+                            Duration = 3,
+                            Image = 4483362458,
+                        })
+                    end
+                end
+            end
+            local selectedOption = Option[1]
+            handleShopTeleport(selectedOption)
+            if selectedOption ~= "Select Shop" then
+                task.spawn(function()
+                    task.wait(0.5)
+                    ShopDropdown:Set({"Select Shop"})
+                end)
+            end
+        end,
+    })
+    
+    local Slider = Misc:CreateSlider({
+        Name = "âš¡ WalkSpeed Input",
+        Range = {16, 500},
+        Increment = 10,
+        Suffix = "Speed",
+        CurrentValue = 16,
+        Flag = "Slider1", 
+        Callback = function(Value)
+            local player = game.Players.LocalPlayer
+            local character = player.Character or player.Character or player.CharacterAdded:Wait()
+            local humanoid = character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid.WalkSpeed = Value
+            end
+        end,   
+    })
+    
+    local Toggle = Misc:CreateToggle({
+        Name = "ğŸ’¥ Infinite Jump",
+        CurrentValue = false,
+        Flag = "Toggle1",
+        Callback = function(Value)
+           if Value then
+              infiniteJumpConnection = game:GetService("UserInputService").JumpRequest:Connect(function()
+                 local player = game.Players.LocalPlayer
+                 local character = player.Character or player.CharacterAdded:Wait()
+                 local humanoid = character:FindFirstChildOfClass("Humanoid")
+                 if humanoid then
+                    humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+                 end
+              end)
+           else
+              if infiniteJumpConnection then
+                 infiniteJumpConnection:Disconnect()
+                 infiniteJumpConnection = nil
+              end
+           end
+        end,
+    })
+    
+    -- Initialize ESP globals at the beginning
+    if not _G.espFolder then
+        _G.espFolder = Instance.new("Folder")
+        _G.espFolder.Name = "OreESP"
+        _G.espFolder.Parent = game.CoreGui
+        _G.espParts = {}
+        _G.espEnabled = false
+        _G.maxDistance = 500
+        _G.oreColors = {
+            ["Tin"] = Color3.fromRGB(180, 180, 160),
+            ["Iron"] = Color3.fromRGB(250, 211, 95),
+            ["Lead"] = Color3.fromRGB(50, 50, 70),
+            ["Cobalt"] = Color3.fromRGB(30, 100, 255),
+            ["Aluminium"] = Color3.fromRGB(220, 220, 230),
+            ["Silver"] = Color3.fromRGB(192, 192, 192),
+            ["Uranium"] = Color3.fromRGB(0, 255, 100),
+            ["Vanadium"] = Color3.fromRGB(255, 50, 50),
+            ["Tungsten"] = Color3.fromRGB(70, 90, 100),
+            ["Gold"] = Color3.fromRGB(255, 215, 0),
+            ["Titanium"] = Color3.fromRGB(120, 120, 140),
+            ["Palladium"] = Color3.fromRGB(255, 180, 0),
+            ["Plutonium"] = Color3.fromRGB(0, 255, 255),
+            ["Mithril"] = Color3.fromRGB(50, 200, 150),
+            ["Thorium"] = Color3.fromRGB(100, 255, 100),
+            ["Iridium"] = Color3.fromRGB(200, 230, 255),
+            ["Adamantium"] = Color3.fromRGB(100, 255, 150),
+            ["Rhodium"] = Color3.fromRGB(220, 220, 255),
+            ["Unobtanium"] = Color3.fromRGB(255, 0, 255),
+            ["Topaz"] = Color3.fromRGB(255, 200, 0),
+            ["Emerald"] = Color3.fromRGB(0, 255, 100),
+            ["Sapphire"] = Color3.fromRGB(0, 100, 255),
+            ["Ruby"] = Color3.fromRGB(255, 0, 50),
+            ["Diamond"] = Color3.fromRGB(200, 255, 255),
+            ["Poudretteite"] = Color3.fromRGB(255, 100, 255),
+            ["Zultanite"] = Color3.fromRGB(255, 150, 100),
+            ["Grandidierite"] = Color3.fromRGB(0, 200, 150),
+            ["Musgravite"] = Color3.fromRGB(100, 150, 200),
+            ["Painite"] = Color3.fromRGB(255, 50, 100),
+        }
+        
+        -- ESP creation function
+        _G.createESP = function(part)
+            -- Try different ways to get ore ID
+            local mineId = part:GetAttribute("MineId") or part:GetAttribute("OreId") or part:GetAttribute("OreName")
+            
+            -- Special handling for unnamed or numbered ores
+            local spawnedBlocks = game:GetService("Workspace"):FindFirstChild("SpawnedBlocks")
+            local placedOre = game:GetService("Workspace"):FindFirstChild("PlacedOre")
+            
+            if spawnedBlocks and part.Parent == spawnedBlocks then
+                for i, child in pairs(spawnedBlocks:GetChildren()) do
+                    if child == part and i == 85 then
+                        mineId = "Iron"
+                        break
+                    end
+                end
+            end
+            
+            -- If mineId is still generic or nil, try using the part name
+            if not mineId or mineId == "Unknown" or mineId == "Part" or mineId == "MeshPart" or mineId == "OreMesh" then
+                mineId = part.Name
+                -- If name is also generic (like OreMesh), use Unknown
+                if mineId == "OreMesh" or mineId == "Part" or mineId == "MeshPart" then
+                    mineId = "Unknown"
+                            end
+                        end
+            
+            local color = _G.oreColors[mineId] or Color3.fromRGB(255, 255, 255)
+            local box = Instance.new("BoxHandleAdornment")
+            box.Adornee = part
+            box.Parent = _G.espFolder
+            box.AlwaysOnTop = true
+            box.ZIndex = 1
+            box.Size = part.Size
+            box.Transparency = 0.5
+            box.Color3 = color
+            box.Visible = false
+            local glowBox = Instance.new("BoxHandleAdornment")
+            glowBox.Adornee = part
+            glowBox.Parent = _G.espFolder
+            glowBox.AlwaysOnTop = true
+            glowBox.ZIndex = 0
+            glowBox.Size = part.Size * 1.05
+            glowBox.Transparency = 0.8
+            glowBox.Color3 = color:Lerp(Color3.new(1, 1, 1), 0.3)
+            glowBox.Visible = false
+            local billboard = Instance.new("BillboardGui")
+            billboard.Adornee = part
+            billboard.Parent = _G.espFolder
+            billboard.Size = UDim2.new(0, 100, 0, 20)
+            billboard.StudsOffset = Vector3.new(0, part.Size.Y/2 + 1, 0)
+            billboard.AlwaysOnTop = true
+            billboard.Enabled = false
+            local textLabel = Instance.new("TextLabel")
+            textLabel.Parent = billboard
+            textLabel.Size = UDim2.new(1, 0, 1, 0)
+            textLabel.BackgroundTransparency = 1
+            textLabel.Text = mineId
+            textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+            textLabel.TextStrokeTransparency = 0
+            textLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
+            textLabel.Font = Enum.Font.GothamBold
+            textLabel.TextScaled = true
+            _G.espParts[part] = {box = box, glowBox = glowBox, billboard = billboard}
+        end
+        
+        -- Setup existing blocks function (now checks PlacedOre folder)
+        _G.setupExistingBlocks = function()
+            -- Check new PlacedOre folder first
+            local placedOre = game:GetService("Workspace"):FindFirstChild("PlacedOre")
+            if placedOre then
+                for _, block in ipairs(placedOre:GetChildren()) do
+                    if (block:IsA("Part") or block:IsA("MeshPart") or block:IsA("BasePart")) and not _G.espParts[block] then
+                        _G.createESP(block)
+                    end
+                end
+            end
+            
+            -- Also check old SpawnedBlocks for backwards compatibility
+            local spawnedBlocks = game:GetService("Workspace"):FindFirstChild("SpawnedBlocks")
+            if spawnedBlocks then
+                for _, block in ipairs(spawnedBlocks:GetChildren()) do
+                    if (block:IsA("Part") or block:IsA("MeshPart") or block:IsA("BasePart")) and not _G.espParts[block] then
+                        _G.createESP(block)
+                    end
+                end
+            end
+        end
+        
+        -- Set up connections for new/removed blocks (PlacedOre folder)
+        local placedOre = game:GetService("Workspace"):FindFirstChild("PlacedOre")
+        if placedOre then
+            _G.placedOreAddedConnection = placedOre.ChildAdded:Connect(function(child)
+                if child:IsA("Part") or child:IsA("MeshPart") or child:IsA("BasePart") then
+                            task.wait(0.1)
+                    _G.createESP(child)
+                end
+            end)
+            _G.placedOreRemovedConnection = placedOre.ChildRemoved:Connect(function(child)
+                if _G.espParts[child] then
+                    _G.espParts[child].box:Destroy()
+                    if _G.espParts[child].glowBox then _G.espParts[child].glowBox:Destroy() end
+                    _G.espParts[child].billboard:Destroy()
+                    _G.espParts[child] = nil
+                end
+            end)
+        end
+        
+        -- Also keep SpawnedBlocks connection for backwards compatibility
+        local spawnedBlocks = game:GetService("Workspace"):FindFirstChild("SpawnedBlocks")
+        if spawnedBlocks then
+            _G.childAddedConnection = spawnedBlocks.ChildAdded:Connect(function(child)
+                if child:IsA("Part") or child:IsA("MeshPart") or child:IsA("BasePart") then
+                                    task.wait(0.1)
+                    _G.createESP(child)
+                end
+            end)
+            _G.childRemovedConnection = spawnedBlocks.ChildRemoved:Connect(function(child)
+                if _G.espParts[child] then
+                    _G.espParts[child].box:Destroy()
+                    if _G.espParts[child].glowBox then _G.espParts[child].glowBox:Destroy() end
+                    _G.espParts[child].billboard:Destroy()
+                    _G.espParts[child] = nil
+                end
+            end)
+        end
+        
+        -- Set up update connection for distance/visibility
+        _G.pulseTime = 0
+        _G.updateConnection = game:GetService("RunService").RenderStepped:Connect(function(deltaTime)
+            local player = game.Players.LocalPlayer
+            local character = player.Character
+            if not character then return end
+            local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+            if not humanoidRootPart then return end
+            _G.pulseTime = _G.pulseTime + deltaTime
+            local pulseValue = (math.sin(_G.pulseTime * 2) + 1) / 2
+            for part, esp in pairs(_G.espParts) do
+                if part and part.Parent then
+                    if _G.espEnabled then
+                        local distance = (humanoidRootPart.Position - part.Position).Magnitude
+                        local isVisible = distance <= _G.maxDistance
+                        esp.box.Visible = isVisible
+                        if esp.glowBox then esp.glowBox.Visible = isVisible end
+                        esp.billboard.Enabled = isVisible
+                        if isVisible and esp.glowBox then
+                            local baseSize = part.Size * 1.05
+                            local pulseSize = baseSize * (1 + pulseValue * 0.1)
+                            esp.glowBox.Size = pulseSize
+                            esp.glowBox.Transparency = 0.7 + (pulseValue * 0.2)
+                        end
+                        if isVisible and esp.billboard.Enabled then
+                            local textLabel = esp.billboard:FindFirstChildOfClass("TextLabel")
+                            if textLabel then
+                                local mineId = part:GetAttribute("MineId") or part:GetAttribute("OreId") or part:GetAttribute("OreName")
+                                
+                                if not mineId or mineId == "Part" or mineId == "MeshPart" or mineId == "OreMesh" then
+                                    mineId = part.Name
+                                    if mineId == "OreMesh" or mineId == "Part" or mineId == "MeshPart" then
+                                        mineId = "Unknown"
+                                    end
+                                end
+                                
+                                textLabel.Text = mineId .. "\n" .. string.format("%.1f", distance) .. " studs"
+                                        end
+                                    end
                     else
-                        local part = ownedModel:FindFirstChildWhichIsA("BasePart")
-                        if part then
-                            part.CFrame = target.CFrame * CFrame.new(0, -5, 0)
+                        esp.box.Visible = false
+                        if esp.glowBox then esp.glowBox.Visible = false end
+                        esp.billboard.Enabled = false
+                                end
+                            end
+                        end
+        end)
+        
+        -- Character respawn handler
+        _G.characterAddedConnection = game.Players.LocalPlayer.CharacterAdded:Connect(function(newCharacter)
+            for part, esp in pairs(_G.espParts) do
+                if esp.box then esp.box:Destroy() end
+                if esp.glowBox then esp.glowBox:Destroy() end
+                if esp.billboard then esp.billboard:Destroy() end
+            end
+            _G.espParts = {}
+            if _G.espEnabled then
+                _G.setupExistingBlocks()
+                    end
+                end)
+        
+        -- Setup existing blocks immediately
+        _G.setupExistingBlocks()
+    end
+
+
+    -- Create a dedicated Auto Mine section
+    local AutoMineSection = Farm:CreateSection("â›ï¸ Auto Mining")
+    local OreLabel = Farm:CreateLabel("ï¼µï½”ï½‰ï½Œï½‰ï½”ï½™ ï¼¨ï½•ï½‚ï¼ ï¼® ï¼ï¼°ï¼¬ï¼¡ï¼¹")
+
+    -- Auto Mine Toggle and Range Slider
+    local autoMineEnabled = false
+    local autoMineThread
+    local autoMineRange = 10 -- default range
+    local autoMineDelay = 1.2 -- default mining delay in seconds
+
+    -- Ore ignore list
+    local OreIgnoreList = {}
+
+    local AutoMineToggle = Farm:CreateToggle({
+        Name = "Auto Mine",
+        CurrentValue = false,
+        Flag = "AutoMineToggle",
+        Callback = function(state)
+            autoMineEnabled = state
+            if autoMineEnabled then
+                autoMineThread = task.spawn(function()
+                    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+                    local Players = game:GetService("Players")
+                    local LocalPlayer = Players.LocalPlayer
+                    local function GetTool()
+                        for _,v in pairs(LocalPlayer.Character:GetChildren()) do
+                            if v:FindFirstChild("EquipRemote") and string.lower(v.Name):find("pickaxe") then
+                                return v
+                            end
+                        end
+                        for _,v in pairs(LocalPlayer:FindFirstChild("InnoBackpack") and LocalPlayer.InnoBackpack:GetChildren() or {}) do
+                            if v:FindFirstChild("EquipRemote") and string.lower(v.Name):find("pickaxe") then
+                                return v
+                            end
+                        end
+                        return nil
+                    end
+                    while autoMineEnabled do
+                        -- Make sure LocalPlayer exists
+                        if not LocalPlayer then
+                            task.wait(0.1)
+                            continue
+                        end
+                        
+                        local Character = LocalPlayer.Character
+                        if not Character then
+                            task.wait(0.1)
+                            continue
+                        end
+                        
+                        local Tool = GetTool()
+                        if not Tool then
+                            task.wait(0.1)
+                            continue
+                        end
+                        local isPickaxe = string.lower(Tool.Name):find("pickaxe") ~= nil
+                        if Tool.Parent == LocalPlayer.InnoBackpack and not isPickaxe then
+                            local equipRemote = Tool:FindFirstChild("EquipRemote")
+                            if equipRemote then
+                                equipRemote:FireServer(true)
+                                task.wait(0.2)
+                            end
+                        end
+                        if (Tool.Parent == LocalPlayer.Character) or (Tool.Parent == LocalPlayer.InnoBackpack and isPickaxe) then
+                            local root = Character and Character:FindFirstChild("HumanoidRootPart")
+                            if root then
+                                local closestBlock, closestDist = nil, math.huge
+                                
+                                -- Check if PlacedOre exists
+                                if not workspace:FindFirstChild("PlacedOre") then
+                                    task.wait(0.1)
+                                    continue
+                                end
+                                
+                                for _,v in pairs(workspace.PlacedOre:GetChildren()) do
+                                    if v:IsA("MeshPart") and v:GetAttribute("MineId") then
+                                        if table.find(OreIgnoreList, v:GetAttribute("MineId")) then
+                                            continue
+                                        end
+                                        local dist = (root.Position - v.Position).Magnitude
+                                        if dist <= autoMineRange and dist < closestDist then
+                                            closestBlock = v
+                                            closestDist = dist
+                                        end
+                                    end
+                                end
+                                if closestBlock then
+                                    -- Get grid position from ore (check for ChunkPosition or GridPosition attribute)
+                                    local gridPos = closestBlock:GetAttribute("ChunkPosition") or closestBlock:GetAttribute("GridPosition")
+                                    
+                                    -- If no grid position attribute, calculate from world position
+                                    if not gridPos then
+                                        local worldPos = closestBlock.Position
+                                        gridPos = Vector3int16.new(
+                                            math.floor(worldPos.X / 4),
+                                            math.floor(worldPos.Y / 4),
+                                            math.floor(worldPos.Z / 4)
+                                        )
+                                    end
+                                    
+                                    local args = {10, gridPos}
+                                    
+                                    -- Add error checking to prevent nil index errors
+                                    local madCommId = Tool:GetAttribute("MadCommId")
+                                    if madCommId and ReplicatedStorage.MadCommEvents and ReplicatedStorage.MadCommEvents[madCommId] then
+                                        local activateRemote = ReplicatedStorage.MadCommEvents[madCommId].Activate
+                                        if activateRemote then
+                                            activateRemote:FireServer(table.unpack(args))
+                                        end
+                                    end
+                                    task.wait(autoMineDelay) -- Use the configurable delay
+                                    continue
+                                end
+                            end
+                        end
+                        task.wait(0.03)
+                    end
+                end)
+            else
+                autoMineEnabled = false
+            end
+        end,
+    })
+
+    local RangeSlider = Farm:CreateSlider({
+        Name = "Auto Mine Range",
+        Range = {5, 50},
+        Increment = 1,
+        Suffix = " studs",
+        CurrentValue = 10,
+        Flag = "AutoMineRange",
+        Callback = function(Value)
+            autoMineRange = Value
+        end,
+    })
+
+    local DelaySlider = Farm:CreateSlider({
+        Name = "Mining Delay",
+        Range = {0, 5},
+        Increment = 0.001,
+        Suffix = "s",
+        CurrentValue = 1.2,
+        Flag = "MiningDelay",
+        Callback = function(Value)
+            autoMineDelay = Value
+        end,
+    })
+
+    local OreIgnoreDropdown = Farm:CreateDropdown({
+        Name = "Ore Ignore List",
+        Options = {"Tin", "Iron", "Lead", "Cobalt", "Aluminium", "Silver", "Uranium", "Vanadium", "Tungsten", "Gold", "Titanium", "Palladium", "Plutonium", "Mithril", "Thorium", "Iridium", "Adamantium", "Rhodium", "Unobtanium", "Topaz", "Emerald", "Sapphire", "Ruby", "Diamond", "Poudretteite", "Zultanite", "Grandidierite", "Musgravite", "Painite"},
+        CurrentOption = {},
+        MultipleOptions = true,
+        Flag = "OreIgnoreList",
+        Callback = function(Options)
+            OreIgnoreList = Options
+        end,
+    })
+
+    -- Auto Sell Section
+    local AutoSellSection = Farm:CreateSection("ğŸ’° Auto Sell")
+    
+    local autoSellEnabled = false
+    local autoSellThread
+    local autoSellThreshold = 90 -- Default threshold at 90%
+    local autoSellOreCount = 8 -- Default ore count
+
+    local AutoSellToggle = Farm:CreateToggle({
+        Name = "Auto Sell",
+        CurrentValue = false,
+        Flag = "AutoSellToggle",
+        Callback = function(state)
+            autoSellEnabled = state
+            if autoSellEnabled then
+                if not autoSellThread then
+                    autoSellThread = task.spawn(function()
+                        while autoSellEnabled do
+                            local player = game.Players.LocalPlayer
+                            local character = player.Character or player.CharacterAdded:Wait()
+                            
+                            -- Check OrePackCargo capacity
+                            local shouldSell = false
+                            local currentOres = 0
+                            
+                            -- Find player's OrePackCargo in workspace
+                            local playerWorkspace = workspace:FindFirstChild(player.Name)
+                            if playerWorkspace then
+                                local orePackCargo = playerWorkspace:FindFirstChild("OrePackCargo")
+                                if orePackCargo then
+                                    -- Count ores (excluding Weld objects)
+                                    for _, child in pairs(orePackCargo:GetChildren()) do
+                                        if not child:IsA("Weld") and not child:IsA("Motor6D") then
+                                            currentOres = currentOres + 1
+                                        end
+                                    end
+                                end
+                            end
+                            
+                            -- Check if we should sell based on ore count
+                            if currentOres >= autoSellOreCount then
+                                shouldSell = true
+                            end
+                            
+                            -- Sell when threshold is reached
+                            if shouldSell then
+                                local hrp = character:FindFirstChild("HumanoidRootPart")
+                                if hrp then
+                                    local oldCFrame = hrp.CFrame
+                                    
+                                    -- Use a more robust search for the CargoVolume/Unloader
+                                    local cargoPrompt = nil
+                                    local positionCargoVolume = nil
+                                    
+                                    local factoryGridItemsServer = game:GetService("Workspace"):FindFirstChild("FactoryGridItemsServer")
+                                    local factoryGridItemsClient = game:GetService("Workspace"):FindFirstChild("FactoryGridItemsClient")
+                                    
+                                    if factoryGridItemsServer then
+                                        for _, folder in pairs(factoryGridItemsServer:GetChildren()) do
+                                            if folder:IsA("Folder") then
+                                                local cargoVolume = folder:FindFirstChild("CargoVolume") or folder:FindFirstChild("Unloader")
+                                                if not cargoVolume then
+                                                    cargoVolume = folder:FindFirstChild("CargoVolume", true)
+                                                end
+                                                
+                                                if cargoVolume then
+                                                    local foundPrompt = cargoVolume:FindFirstChild("CargoPrompt") or cargoVolume:FindFirstChildOfClass("ProximityPrompt") or cargoVolume:FindFirstChild("CargoPrompt", true)
+                                                    if not foundPrompt then
+                                                        for _, desc in pairs(cargoVolume:GetDescendants()) do
+                                                            if desc:IsA("ProximityPrompt") then
+                                                                foundPrompt = desc
+                                                                break
+                                                            end
+                                                        end
+                                                    end
+                                                    
+                                                    if foundPrompt then
+                                                        cargoPrompt = foundPrompt
+                                                        if factoryGridItemsClient then
+                                                            local clientFolder = factoryGridItemsClient:FindFirstChild(folder.Name)
+                                                            if clientFolder then
+                                                                local clientSubFolder = clientFolder:FindFirstChild(folder.Name)
+                                                                if clientSubFolder then
+                                                                    positionCargoVolume = clientSubFolder:FindFirstChild("Unloader1") and clientSubFolder.Unloader1:FindFirstChild("CargoVolume") or clientSubFolder:FindFirstChild("CargoVolume", true)
+                                                                end
+                                                            end
+                                                        end
+                                                        if cargoPrompt and positionCargoVolume then break end
+                                                    end
+                                                end
+                                            end
+                                        end
+                                    
+                                    if cargoPrompt and positionCargoVolume then
+                                        -- Position near the CargoVolume and fire the ProximityPrompt
+                                        hrp.CFrame = positionCargoVolume.CFrame * CFrame.new(0, 3, 0)
+                                        task.wait(0.3)
+                                        cargoPrompt.HoldDuration = 0
+                                        fireproximityprompt(cargoPrompt)
+                                        task.wait(0.3)
+                                        hrp.CFrame = oldCFrame
+                                            
+                                            Rayfield:Notify({
+                                                Title = "Auto Sell",
+                                                Content = "Sold " .. currentOres .. " ores successfully!",
+                                                Duration = 3,
+                                                Image = "box",
+                                            })
+                                            task.wait(2)
+                                        else
+                                            Rayfield:Notify({
+                                                Title = "Auto Sell Error",
+                                                Content = "No working CargoVolume with ProximityPrompt found! Make sure someone has built an unloader.",
+                                                Duration = 3,
+                                                Image = "circle-x",
+                                            })
+                                        end
+                                    else
+                                        Rayfield:Notify({
+                                            Title = "Auto Sell Error",
+                                            Content = "FactoryGridItemsServer not found! Make sure you have built an unloader.",
+                                            Duration = 3,
+                                            Image = "circle-x",
+                                        })
+                                    end
+                                end
+                            end
+                            task.wait(0.5)
+                        end
+                    end)
+                end
+            else
+                autoSellEnabled = false
+                autoSellThread = nil
+            end
+        end,
+    })
+    
+    local AutoSellOreCountInput = Farm:CreateInput({
+        Name = "Ore Capacity (Max: 64)",
+        CurrentValue = "8",
+        PlaceholderText = "Enter ore capacity (1-64)",
+        RemoveTextAfterFocusLost = false,
+        Flag = "AutoSellOreCount",
+        Callback = function(Text)
+            local value = tonumber(Text)
+            if value then
+                if value > 64 then
+                    value = 64
+                    Rayfield:Notify({
+                        Title = "Ore Capacity Limited",
+                        Content = "Maximum capacity is 64 ores. Set to 64.",
+                        Duration = 3,
+                        Image = "alert-circle",
+                    })
+                elseif value < 1 then
+                    value = 1
+                end
+                autoSellOreCount = value
+            else
+                Rayfield:Notify({
+                    Title = "Invalid Input",
+                    Content = "Please enter a valid number between 1 and 64.",
+                    Duration = 3,
+                    Image = "circle-x",
+                })
+            end
+        end,
+    })
+    
+    Farm:CreateLabel("ğŸ’¡ Sells when ore capacity reaches max (depends on backpack capacity)")
+
+    -- Move Store Ore Key input here, right after Auto Sell
+    local Input = Farm:CreateInput({
+        Name = "Sell Ore Key (Optional)",
+        CurrentValue = "",
+        PlaceholderText = "Press key to sell ore (e.g. 'F')",
+        RemoveTextAfterFocusLost = false,
+        Flag = "SellOreKey",
+        Callback = function(Text)
+            task.spawn(function()
+                task.wait(0.1) 
+            end)
+            if Text and Text ~= "" then
+                if _G.sellOreKeyConnection then
+                    _G.sellOreKeyConnection:Disconnect()
+                    _G.sellOreKeyConnection = nil
+                end
+                _G.sellOreKeyConnection = game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
+                    if gameProcessed then return end
+                    local keyName = input.KeyCode.Name
+                    if keyName:lower() == Text:lower() then
+                        local player = game.Players.LocalPlayer
+                        local character = player.Character or player.CharacterAdded:Wait()
+                        local hrp = character:WaitForChild("HumanoidRootPart")
+                        local savedCFrame = hrp.CFrame
+                            -- Use a more robust search for the CargoVolume/Unloader
+                            local cargoPrompt = nil
+                            local positionCargoVolume = nil
+                            
+                            local factoryGridItemsServer = game:GetService("Workspace"):FindFirstChild("FactoryGridItemsServer")
+                            local factoryGridItemsClient = game:GetService("Workspace"):FindFirstChild("FactoryGridItemsClient")
+                            
+                            if factoryGridItemsServer then
+                                for _, folder in pairs(factoryGridItemsServer:GetChildren()) do
+                                    if folder:IsA("Folder") then
+                                        local cargoVolume = folder:FindFirstChild("CargoVolume") or folder:FindFirstChild("Unloader")
+                                        if not cargoVolume then
+                                            cargoVolume = folder:FindFirstChild("CargoVolume", true)
+                                        end
+                                        
+                                        if cargoVolume then
+                                            local foundPrompt = cargoVolume:FindFirstChild("CargoPrompt") or cargoVolume:FindFirstChildOfClass("ProximityPrompt") or cargoVolume:FindFirstChild("CargoPrompt", true)
+                                            if not foundPrompt then
+                                                for _, desc in pairs(cargoVolume:GetDescendants()) do
+                                                    if desc:IsA("ProximityPrompt") then
+                                                        foundPrompt = desc
+                                                        break
+                                                    end
+                                                end
+                                            end
+                                            
+                                            if foundPrompt then
+                                                cargoPrompt = foundPrompt
+                                                if factoryGridItemsClient then
+                                                    local clientFolder = factoryGridItemsClient:FindFirstChild(folder.Name)
+                                                    if clientFolder then
+                                                        local clientSubFolder = clientFolder:FindFirstChild(folder.Name)
+                                                        if clientSubFolder then
+                                                            positionCargoVolume = clientSubFolder:FindFirstChild("Unloader1") and clientSubFolder.Unloader1:FindFirstChild("CargoVolume") or clientSubFolder:FindFirstChild("CargoVolume", true)
+                                                        end
+                                                    end
+                                                end
+                                                if cargoPrompt and positionCargoVolume then break end
+                                            end
+                                        end
+                                    end
+                                end
+                            
+                            if cargoPrompt and positionCargoVolume then
+                                -- Count ores before selling
+                                local function countOres()
+                                    local count = 0
+                                    local playerWorkspace = game:GetService("Workspace"):FindFirstChild(player.Name)
+                                    if playerWorkspace then
+                                        local orePackCargo = playerWorkspace:FindFirstChild("OrePackCargo")
+                                        if orePackCargo then
+                                            for _, child in pairs(orePackCargo:GetChildren()) do
+                                                if not child:IsA("Weld") and not child:IsA("Motor6D") and not child:IsA("Attachment") then
+                                                    count = count + 1
+                                                end
+                                            end
+                                        end
+                                    end
+                                    return count
+                                end
+                                
+                                local oreCount = countOres()
+                                
+                                -- Position near the CargoVolume and fire the ProximityPrompt
+                                hrp.CFrame = positionCargoVolume.CFrame * CFrame.new(0, 3, 0)
+                                task.wait(0.3)
+                                cargoPrompt.HoldDuration = 0
+                                fireproximityprompt(cargoPrompt)
+                                task.wait(0.3)
+                                hrp.CFrame = savedCFrame
+                                
+                                Rayfield:Notify({
+                                    Title = "Ore Sold",
+                                    Content = "Successfully sold " .. oreCount .. " ores.",
+                                    Duration = 3,
+                                    Image = "check",
+                                })
+                            else
+                                Rayfield:Notify({
+                                    Title = "Error",
+                                    Content = "No working CargoVolume with ProximityPrompt found! Make sure someone has built an unloader.",
+                                    Duration = 3,
+                                    Image = "circle-x",
+                                })
+                            end
+                        else
+                            Rayfield:Notify({
+                                Title = "Error",
+                                Content = "FactoryGridItemsServer not found! Make sure you have built an unloader.",
+                                Duration = 3,
+                                Image = "circle-x",
+                            })
                         end
                     end
-                end
-                repeat
-                    task.wait(0.3)
-                until not running or (ownedModel == nil or ownedModel.Parent ~= modelsFolder)
-                if not running then break end
-                local oldCharacter = player.Character
-                repeat
-                    task.wait(0.2)
-                until not running or (player.Character ~= oldCharacter and player.Character ~= nil)
-                if not running then break end
-                task.wait(0.4)
-                local newChar = player.Character
-                local newRoot = newChar:WaitForChild("HumanoidRootPart")
-                newRoot.CFrame = CFrame.new(737, 39, -2118)
-                task.wait(2.1)
+                end)
+                Rayfield:Notify({
+                    Title = "Key Bound",
+                    Content = "Sell Ore key bound to: " .. Text,
+                    Duration = 3,
+                    Image = "box",
+                })
             end
-        end)
-    end
-end)
-Options.AutoFarmToggle:SetValue(false)
------
------
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-local running = false
-local sliderValue = 1000
-local originalSpeed = nil
-local currentModel = nil
-local function getMyModel()
-    local folder = workspace:FindFirstChild("RunningModels")
-    if not folder then return nil end
-    for _, model in ipairs(folder:GetChildren()) do
-        if model:GetAttribute("OwnerId") == player.UserId then
-            return model
-        end
-    end
-    return nil
-end
-local function applySpeed()
-    local model = getMyModel()
-    if not model then
-        currentModel = nil
-        return
-    end
-    if model ~= currentModel then
-        currentModel = model
-        originalSpeed = model:GetAttribute("MovementSpeed")
-    end
-    if running then
-        if originalSpeed == nil then
-            originalSpeed = model:GetAttribute("MovementSpeed")
-        end
-        model:SetAttribute("MovementSpeed", sliderValue)
-    end
-end
-task.spawn(function()
-    while true do
-        if running then
-            applySpeed()
-        end
-        task.wait(0.2)
-    end
-end)
-local Toggle = Tabs.Stats:AddToggle("MovementToggle", {
-    Title = "Enable Custom Lucky Block Speed",
-    Default = false
-})
-Toggle:OnChanged(function()
-    running = Options.MovementToggle.Value
-    if not running then
-        local model = getMyModel()
-        if model and originalSpeed ~= nil then
-            model:SetAttribute("MovementSpeed", originalSpeed)
-        end
-        originalSpeed = nil
-        currentModel = nil
-    end
-end)
-local Slider = Tabs.Stats:AddSlider("MovementSlider", {
-    Title = "Lucky Block Speed",
-    Default = 1000,
-    Min = 50,
-    Max = 3000,
-    Rounding = 0
-})
-Slider:OnChanged(function(Value)
-    sliderValue = Value
-end)
------
------
-local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Player = Players.LocalPlayer
-local Backpack = Player:WaitForChild("Backpack")
-local SellBrainrot = ReplicatedStorage
-    :WaitForChild("Packages")
-    :WaitForChild("_Index")
-    :WaitForChild("sleitnick_knit@1.7.0")
-    :WaitForChild("knit")
-    :WaitForChild("Services")
-    :WaitForChild("InventoryService")
-    :WaitForChild("RF")
-    :WaitForChild("SellBrainrot")
-local Suffixes = {
-    K  = 1e3,  M  = 1e6,  B  = 1e9,
-    T  = 1e12, QA = 1e15, QI = 1e18,
-    SX = 1e21, SP = 1e24, OC = 1e27, NO = 1e30,
-}
-local function ParseCashPerSec(str)
-    if not str then return 0 end
-    str = tostring(str)
-    local numPart, suffix = str:match("%+?([%d%.]+)(%a*)%$")
-    local num = tonumber(numPart) or 0
-    if suffix and suffix ~= "" then
-        local mult = Suffixes[suffix:upper()]
-        if mult then num = num * mult end
-    end
-    return num
-end
-local AllNames = {
-    "67",
-    "agarrini_lapalini",
-    "angel_bisonte_giuppitere",
-    "angel_job_job_sahur",
-    "angela_larila",
-    "angelinni_octossini",
-    "angelzini_bananini",
-    "ballerina_cappuccina",
-    "ballerino_lololo",
-    "bisonte_giuppitere_giuppitercito",
-    "blueberrinni_octossini",
-    "bobrito_bandito",
-    "bombardino_crocodilo",
-    "boneca_ambalabu",
-    "brr_brr_patapim",
-    "burbaloni_luliloli",
-    "cacto_hipopotamo",
-    "capuccino_assassino",
-    "cathinni_sushinni",
-    "cavallo_virtuoso",
-    "chachechi",
-    "chicleteira_bicicleteira",
-    "chimpanzini_bananini",
-    "cocofanto_elefanto",
-    "devilcino_assassino",
-    "devilivion",
-    "devupat_kepat_prekupat",
-    "diavolero_tralala",
-    "ding_sahur",
-    "dojonini_assassini",
-    "dragoni_cannelloni",
-    "ferro_sahur",
-    "frigo_camello",
-    "frulli_frula",
-    "ganganzelli_trulala",
-    "gangster_foottera",
-    "glorbo_frutodrillo",
-    "gorgonzilla",
-    "gorillo_watermellondrillo",
-    "graipus_medus",
-    "i2perfectini_foxinini",
-    "job_job_job_sahur",
-    "karkirkur",
-    "ketupat_kepat_prekupat",
-    "la_vacca_saturno_saturnita",
-    "las_vaquitas_saturnitas",
-    "lerulerulerule",
-    "lirili_larila",
-    "los_crocodillitos",
-    "los_tralaleritos",
-    "luminous_yoni",
-    "magiani_tankiani",
-    "malame",
-    "malamevil",
-    "mateo",
-    "meowl",
-    "orangutini_ananassini",
-    "orcalero_orcala",
-    "pipi_potato",
-    "pot_hotspot",
-    "raccooni_watermelunni",
-    "rang_ring_reng",
-    "rhino_toasterino",
-    "salamino_penguino",
-    "spaghetti_tualetti",
-    "spioniro_golubiro",
-    "strawberrini_octosini",
-    "strawberry_elephant",
-    "svinina_bombobardino",
-    "ta_ta_ta_ta_sahur",
-    "te_te_te_te_sahur",
-    "ti_ti_ti_sahur",
-    "tigrrullini_watermellini",
-    "to_to_to_sahur",
-    "toc_toc_sahur",
-    "torrtuginni_dragonfrutinni",
-    "tracoducotulu_delapeladustuz",
-    "tralalero_tralala",
-    "trippi_troppi_troppa_trippa",
-    "trulimero_trulicina",
-    "udin_din_din_dun",
-    "yoni",
-}
-local function GetAllTools()
-    local tools = {}
-    for _, item in ipairs(Backpack:GetChildren()) do
-        if item:IsA("Tool") then table.insert(tools, item) end
-    end
-    if Player.Character then
-        for _, item in ipairs(Player.Character:GetChildren()) do
-            if item:IsA("Tool") then table.insert(tools, item) end
-        end
-    end
-    return tools
-end
-local Toggle = Tabs.Sell:AddToggle("SellToggle", {
-    Title   = "Auto Sell Brainrots",
-    Default = false,
-})
-local Slider = Tabs.Sell:AddSlider("SellSlider", {
-    Title       = "Sell Interval (s)",
-    Description = "How often the auto-sell fires",
-    Default     = 2,
-    Min         = 0,
-    Max         = 10,
-    Rounding    = 0,
-})
-local FilterDropdown = Tabs.Sell:AddDropdown("FilterDropdown", {
-    Title   = "Filter What to Sell By",
-    Values  = {"Mutation", "Cash/s", "Name"},
-    Multi   = false,
-    Default = "Mutation",
-})
-local MutationDropdown = Tabs.Sell:AddDropdown("MutationDropdown", {
-    Title   = "Mutations to Sell",
-    Values  = {"NORMAL", "CANDY", "GOLD", "DIAMOND", "VOID"},
-    Multi   = true,
-    Default = {},
-})
-local NameDropdown = Tabs.Sell:AddDropdown("NameDropdown", {
-    Title   = "Names to Sell",
-    Values  = AllNames,
-    Multi   = true,
-    Default = {},
-})
-local CashInput = Tabs.Sell:AddInput("CashInput", {
-    Title       = "Sell Below Cash/s",
-    Default     = "0",
-    Placeholder = "e.g. 1000000",
-    Numeric     = true,
-    Finished    = false,
-})
-local function ShouldSell(tool)
-    local filter = Options.FilterDropdown.Value
-    if filter == "Mutation" then
-        local mutation = tool:GetAttribute("Mutation")
-        if not mutation then return false end
-        return Options.MutationDropdown.Value[mutation] == true
+        end,
+    })
 
-    elseif filter == "Name" then
-        local brainrotType = tool:GetAttribute("BrainrotType")
-        if not brainrotType then return false end
-        return Options.NameDropdown.Value[brainrotType] == true
+    -- Ore ESP section
+    local OreSection = Farm:CreateSection("â›°ï¸ Ore Esp Selection") 
+    local OreLabel = Farm:CreateLabel("Reveals every type of ore found throughout mining.")
 
-    elseif filter == "Cash/s" then
-        local cashAttr = tool:GetAttribute("CashPerSec")
-        if not cashAttr then return false end
-        local toolValue = ParseCashPerSec(tostring(cashAttr))
-        local threshold = tonumber(Options.CashInput.Value) or 0
-        return toolValue < threshold
-    end
-    return false
-end
-local function TrySell(tool)
-    local entityId = tool:GetAttribute("EntityId")
-    if entityId then
-        SellBrainrot:InvokeServer(entityId)
-    end
-end
-task.spawn(function()
-    while true do
-        local interval = Options.SellSlider.Value
-        task.wait(math.max(interval, 0.1))
+    local blocksEspButton = Farm:CreateToggle({
+        Name = "Ore ESP",
+        CurrentValue = false,
+        Flag = nil,
+        Callback = function(Value)
+            _G.espEnabled = Value
+        end,
+    })
+    local distanceSlider = Farm:CreateSlider({
+        Name = "Ore ESP Distance",
+        Range = {0, 500},
+        Increment = 5,
+        Suffix = "studs",
+        CurrentValue = 100,
+        Flag = nil,
+        Callback = function(Value)
+                _G.maxDistance = Value
+        end,
+    })
 
-        if Options.SellToggle.Value then
-            for _, tool in ipairs(GetAllTools()) do
-                if ShouldSell(tool) then
-                    TrySell(tool)
-                    task.wait(0.05)
+    local WaypointSection = Farm:CreateSection("ğŸ“ Waypoint System")
+    local WaypointLabel = Farm:CreateLabel("Set a waypoint and teleport back to it with keybinds")
+    _G.savedWaypoint = nil
+    local SetWaypointInput = Farm:CreateInput({
+        Name = "Set Waypoint Key",
+        CurrentValue = "",
+        PlaceholderText = "Press key to save position (e.g. 'Z')",
+        RemoveTextAfterFocusLost = false,
+        Flag = "SetWaypointKey",
+        Callback = function(Text)
+            task.spawn(function()
+                task.wait(0.1) 
+            end)
+            if Text and Text ~= "" then
+                if _G.setWaypointKeyConnection then
+                    _G.setWaypointKeyConnection:Disconnect()
+                    _G.setWaypointKeyConnection = nil
                 end
+                _G.setWaypointKeyConnection = game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
+                    if gameProcessed then return end
+                    local keyName = input.KeyCode.Name
+                    local keyMatches = (keyName:lower() == Text:lower())
+                    local specialKeys = {
+                        ["space"] = Enum.KeyCode.Space,
+                        ["shift"] = Enum.KeyCode.LeftShift,
+                        ["ctrl"] = Enum.KeyCode.LeftControl,
+                        ["alt"] = Enum.KeyCode.LeftAlt,
+                        ["tab"] = Enum.KeyCode.Tab,
+                        ["capslock"] = Enum.KeyCode.CapsLock,
+                        ["backspace"] = Enum.KeyCode.Backspace,
+                        ["enter"] = Enum.KeyCode.Return,
+                        ["delete"] = Enum.KeyCode.Delete,
+                        ["insert"] = Enum.KeyCode.Insert,
+                        ["home"] = Enum.KeyCode.Home,
+                        ["end"] = Enum.KeyCode.End,
+                        ["pageup"] = Enum.KeyCode.PageUp,
+                        ["pagedown"] = Enum.KeyCode.PageDown,
+                        ["up"] = Enum.KeyCode.Up,
+                        ["down"] = Enum.KeyCode.Down,
+                        ["left"] = Enum.KeyCode.Left,
+                        ["right"] = Enum.KeyCode.Right,
+                    }
+                    if specialKeys[string.lower(Text)] and input.KeyCode == specialKeys[string.lower(Text)] then
+                        keyMatches = true
+                    end
+                    if keyMatches then
+                        local player = game.Players.LocalPlayer
+                        local character = player.Character or player.CharacterAdded:Wait()
+                        local hrp = character:FindFirstChild("HumanoidRootPart")
+                        if hrp then
+                            _G.savedWaypoint = hrp.CFrame
+                            Rayfield:Notify({
+                                Title = "Waypoint Set",
+                                Content = "Successfully saved current position as waypoint.",
+                                Duration = 3,
+                                Image = "navigation",
+                            })
+                        else
+                            Rayfield:Notify({
+                                Title = "Error",
+                                Content = "Could not save waypoint. Try again.",
+                                Duration = 3,
+                                Image = "circle-x",
+                            })
+                        end
+                    end
+                end)
+                Rayfield:Notify({
+                    Title = "Key Bound",
+                    Content = "Set Waypoint key bound to: " .. Text,
+                    Duration = 3,
+                    Image = "navigation",
+                })
             end
+        end,
+    })
+    local TeleportWaypointInput = Farm:CreateInput({
+        Name = "Teleport to Waypoint Key",
+        CurrentValue = "",
+        PlaceholderText = "Press key to teleport to waypoint (e.g. 'X')",
+        RemoveTextAfterFocusLost = false,
+        Flag = "TeleportWaypointKey",
+        Callback = function(Text)
+            task.spawn(function()
+                task.wait(0.1)
+            end)
+            if Text and Text ~= "" then
+                if _G.teleportToWaypointKeyConnection then
+                    _G.teleportToWaypointKeyConnection:Disconnect()
+                    _G.teleportToWaypointKeyConnection = nil
+                end
+                _G.teleportToWaypointKeyConnection = game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
+                    if gameProcessed then return end
+                    local keyName = input.KeyCode.Name
+                    local keyMatches = (keyName:lower() == Text:lower())
+                    local specialKeys = {
+                        ["space"] = Enum.KeyCode.Space,
+                        ["shift"] = Enum.KeyCode.LeftShift,
+                        ["ctrl"] = Enum.KeyCode.LeftControl,
+                        ["alt"] = Enum.KeyCode.LeftAlt,
+                        ["tab"] = Enum.KeyCode.Tab,
+                        ["capslock"] = Enum.KeyCode.CapsLock,
+                        ["backspace"] = Enum.KeyCode.Backspace,
+                        ["enter"] = Enum.KeyCode.Return,
+                        ["delete"] = Enum.KeyCode.Delete,
+                        ["insert"] = Enum.KeyCode.Insert,
+                        ["home"] = Enum.KeyCode.Home,
+                        ["end"] = Enum.KeyCode.End,
+                        ["pageup"] = Enum.KeyCode.PageUp,
+                        ["pagedown"] = Enum.KeyCode.PageDown,
+                        ["up"] = Enum.KeyCode.Up,
+                        ["down"] = Enum.KeyCode.Down,
+                        ["left"] = Enum.KeyCode.Left,
+                        ["right"] = Enum.KeyCode.Right,
+                    }
+                    if specialKeys[string.lower(Text)] and input.KeyCode == specialKeys[string.lower(Text)] then
+                        keyMatches = true
+                    end
+                    if keyMatches then
+                        local player = game.Players.LocalPlayer
+                        local character = player.Character or player.CharacterAdded:Wait()
+                        local hrp = character:FindFirstChild("HumanoidRootPart")
+                        if hrp and _G.savedWaypoint then
+                            hrp.CFrame = _G.savedWaypoint
+                            Rayfield:Notify({
+                                Title = "Teleported to Waypoint",
+                                Content = "Successfully teleported to saved waypoint.",
+                                Duration = 3,
+                                Image = "map",
+                            })
+                        else
+                            Rayfield:Notify({
+                                Title = "Error",
+                                Content = "No waypoint set or character not found. Set a waypoint first.",
+                                Duration = 3,
+                                Image = "circle-x",
+                            })
+                        end
+                    end
+                end)
+                Rayfield:Notify({
+                    Title = "Key Bound",
+                    Content = "Teleport to Waypoint key bound to: " .. Text,
+                    Duration = 3,
+                    Image = "navigation",
+                })
+            end
+        end,
+    })
+
+    -- Notification timer to thank users and promote Discord server
+    task.spawn(function()
+        task.wait(10)
+        Rayfield:Notify({
+            Title = "Cracked By ATA_scripts [Equinox Hub]",
+            Content = "https://scriptblox.com/u/ATA_scripts",
+            Duration = 5,
+            Image = "shield-alert",
+        })
+        while true do
+            task.wait(500)
+            local messages = {
+                {
+                    Title = "Cracked By ATA_scripts [Equinox Hub]",
+                    Content = "https://scriptblox.com/u/ATA_scripts",
+                }
+            }
+            local randomMessage = messages[math.random(1, #messages)]
+            Rayfield:Notify({
+                Title = randomMessage.Title,
+                Content = randomMessage.Content,
+                Duration = 5,
+                Image = 4483362458,
+            })
         end
-    end
-end)
------
------
-SaveManager:SetLibrary(Fluent)
-InterfaceManager:SetLibrary(Fluent)
-SaveManager:IgnoreThemeSettings()
-SaveManager:SetIgnoreIndexes({})
-InterfaceManager:SetFolder("FluentScriptHub")
-SaveManager:SetFolder("FluentScriptHub/specific-game")
-InterfaceManager:BuildInterfaceSection(Tabs.Settings)
-SaveManager:BuildConfigSection(Tabs.Settings)
-Window:SelectTab(1)
-SaveManager:LoadAutoloadConfig()
+    end)
 end
